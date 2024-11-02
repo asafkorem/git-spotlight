@@ -4,77 +4,108 @@ import React, { useState } from 'react';
 import { Flashlight, Flame, Skull, Magnet, Info } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
-const GitSpotlight = () => {
-  const [globalTimeWindow, setGlobalTimeWindow] = useState("1 year");
-  const [globalKeywords, setGlobalKeywords] = useState("fix,bug,refactor");
+// Type Definitions
+type TimeWindow = '1 month' | '3 months' | '6 months' | '1 year' | '2 years';
 
-  const [commandParams, setCommandParams] = useState({
-    hotspots: {
-      useGlobal: true,
-      timeWindow: "1 year",
-      keywords: "fix,bug,refactor",
-      limit: 10
-    },
-    dungeons: {
-      useGlobal: true,
-      timeWindow: "1 year",
-      keywords: "fix,bug,refactor",
-      minChanges: 5,
-      maxAuthors: 2
-    },
-    magnets: {
-      useGlobal: true,
-      timeWindow: "1 year",
-      keywords: "fix,bug,refactor",
-      minCoupling: 3
-    }
-  });
+interface BaseCommandParams {
+  useGlobal: boolean;
+  timeWindow: TimeWindow;
+  keywords: string;
+}
 
-  const updateCommandParams = (command, params) => {
-    setCommandParams(prev => ({
-      ...prev,
-      [command]: { ...prev[command], ...params }
-    }));
-  };
+interface HotspotParams extends BaseCommandParams {
+  limit: number;
+}
 
-  const getEffectiveParams = (command) => {
-    const params = commandParams[command];
-    return {
-      timeWindow: params.useGlobal ? globalTimeWindow : params.timeWindow,
-      keywords: params.useGlobal ? globalKeywords : params.keywords,
-      ...params
-    };
-  };
+interface DungeonParams extends BaseCommandParams {
+  minChanges: number;
+  maxAuthors: number;
+}
 
-  const patterns = [
-    {
-      id: 'hotspots',
-      icon: <Flame className="w-6 h-6 text-orange-500" />,
-      title: "Hotspots 🌶️🔥",
-      description: "Track frequently changing files that might need attention",
-      command: (params) => {
-        const keywordFilter = params.keywords ? `--grep="${params.keywords.split(',').join('\\|')}" -i` : '';
-        return `git log --since="${params.timeWindow} ago" ${keywordFilter} --name-only --pretty=format: | \
+interface MagnetParams extends BaseCommandParams {
+  minCoupling: number;
+}
+
+interface CommandParams {
+  hotspots: HotspotParams;
+  dungeons: DungeonParams;
+  magnets: MagnetParams;
+}
+
+interface ParamConfig {
+  name: string;
+  label: string;
+  type: 'number';
+  min: number;
+  max: number;
+}
+
+// Create a type for each pattern with its specific params type
+interface PatternBase<T extends keyof CommandParams> {
+  id: T;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  command: (params: CommandParams[T]) => string;
+  params: ParamConfig[];
+}
+
+// Union type of all possible patterns
+type Pattern = PatternBase<'hotspots'> | PatternBase<'dungeons'> | PatternBase<'magnets'>;
+
+const TIME_WINDOWS: TimeWindow[] = ['1 month', '3 months', '6 months', '1 year', '2 years'];
+
+const DEFAULT_PARAMS: CommandParams = {
+  hotspots: {
+    useGlobal: true,
+    timeWindow: '1 year',
+    keywords: 'fix,bug,refactor',
+    limit: 10
+  },
+  dungeons: {
+    useGlobal: true,
+    timeWindow: '1 year',
+    keywords: 'fix,bug,refactor',
+    minChanges: 5,
+    maxAuthors: 2
+  },
+  magnets: {
+    useGlobal: true,
+    timeWindow: '1 year',
+    keywords: 'fix,bug,refactor',
+    minCoupling: 3
+  }
+};
+
+const patterns: Pattern[] = [
+  {
+    id: 'hotspots',
+    icon: <Flame className="w-6 h-6 text-orange-500" />,
+    title: "Hotspots 🌶️🔥",
+    description: "Track frequently changing files that might need attention",
+    command: (params: HotspotParams) => {
+      const keywordFilter = params.keywords ? `--grep="${params.keywords.split(',').join('\\|')}" -i` : '';
+      return `git log --since="${params.timeWindow} ago" ${keywordFilter} --name-only --pretty=format: | \
 sort | uniq -c | sort -nr | head -${params.limit}`;
-      },
-      params: [
-        {
-          name: 'limit',
-          label: 'Number of files to show',
-          type: 'number',
-          min: 5,
-          max: 50
-        }
-      ]
     },
-    {
-      id: 'dungeons',
-      icon: <Skull className="w-6 h-6 text-purple-500" />,
-      title: "Dungeons 💀🐉",
-      description: "Find complex code sections with limited maintainers",
-      command: (params) => {
-        const keywordFilter = params.keywords ? `--grep="${params.keywords.split(',').join('\\|')}" -i` : '';
-        return `git log --since="${params.timeWindow} ago" ${keywordFilter} --name-only --pretty=format: | \
+    params: [
+      {
+        name: 'limit',
+        label: 'Number of files to show',
+        type: 'number',
+        min: 5,
+        max: 50
+      }
+    ]
+  },
+  {
+    id: 'dungeons',
+    icon: <Skull className="w-6 h-6 text-purple-500" />,
+    title: "Dungeons 💀🐉",
+    description: "Find complex code sections with limited maintainers",
+    command: (params: DungeonParams) => {
+      const keywordFilter = params.keywords ? `--grep="${params.keywords.split(',').join('\\|')}" -i` : '';
+      return `git log --since="${params.timeWindow} ago" ${keywordFilter} --name-only --pretty=format: | \
 sort | uniq | \
 while read -r file; do
     if [ ! -z "$file" ]; then
@@ -96,32 +127,32 @@ while read -r file; do
         fi
     fi
 done | sort -t"(" -k2 -nr`;
-      },
-      params: [
-        {
-          name: 'minChanges',
-          label: 'Minimum changes',
-          type: 'number',
-          min: 1,
-          max: 100
-        },
-        {
-          name: 'maxAuthors',
-          label: 'Maximum authors',
-          type: 'number',
-          min: 1,
-          max: 10
-        }
-      ]
     },
-    {
-      id: 'magnets',
-      icon: <Magnet className="w-6 h-6 text-amber-500" />,
-      title: "Dependency Magnets 🧲",
-      description: "Identify files often changed together",
-      command: (params) => {
-        const keywordFilter = params.keywords ? `--grep="${params.keywords.split(',').join('\\|')}" -i` : '';
-        return `git log --since="${params.timeWindow} ago" ${keywordFilter} --name-only --pretty=format:"%h" | \
+    params: [
+      {
+        name: 'minChanges',
+        label: 'Minimum changes',
+        type: 'number',
+        min: 1,
+        max: 100
+      },
+      {
+        name: 'maxAuthors',
+        label: 'Maximum authors',
+        type: 'number',
+        min: 1,
+        max: 10
+      }
+    ]
+  },
+  {
+    id: 'magnets',
+    icon: <Magnet className="w-6 h-6 text-amber-500" />,
+    title: "Dependency Magnets 🧲",
+    description: "Identify files often changed together",
+    command: (params: MagnetParams) => {
+      const keywordFilter = params.keywords ? `--grep="${params.keywords.split(',').join('\\|')}" -i` : '';
+      return `git log --since="${params.timeWindow} ago" ${keywordFilter} --name-only --pretty=format:"%h" | \
 awk -v min=${params.minCoupling} '
 BEGIN { commit = "" }
 NF==1 { commit = $1; next }
@@ -141,18 +172,58 @@ END {
         }
     }
 }' | sort -rn`;
-      },
-      params: [
-        {
-          name: 'minCoupling',
-          label: 'Minimum coupling occurrences',
-          type: 'number',
-          min: 2,
-          max: 50
-        }
-      ]
+    },
+    params: [
+      {
+        name: 'minCoupling',
+        label: 'Minimum coupling occurrences',
+        type: 'number',
+        min: 2,
+        max: 50
+      }
+    ]
+  }
+] as const;
+
+const getParamValue = <T extends keyof CommandParams>(
+    params: CommandParams[T],
+    paramName: string
+): number => {
+  const value = params[paramName as keyof typeof params];
+  return typeof value === 'number' ? value : 0;
+};
+
+const GitSpotlight: React.FC = () => {
+  const [globalTimeWindow, setGlobalTimeWindow] = useState<TimeWindow>('1 year');
+  const [globalKeywords, setGlobalKeywords] = useState<string>('fix,bug,refactor');
+  const [commandParams, setCommandParams] = useState<CommandParams>(DEFAULT_PARAMS);
+
+  const updateCommandParams = <T extends keyof CommandParams>(
+      command: T,
+      params: Partial<CommandParams[T]>
+  ) => {
+    setCommandParams(prev => ({
+      ...prev,
+      [command]: { ...prev[command], ...params }
+    }));
+  };
+
+  const getEffectiveParams = <T extends keyof CommandParams>(command: T): CommandParams[T] => {
+    const params = commandParams[command];
+    return {
+      ...params,
+      timeWindow: params.useGlobal ? globalTimeWindow : params.timeWindow,
+      keywords: params.useGlobal ? globalKeywords : params.keywords,
+    };
+  };
+
+  const handleCopyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
     }
-  ];
+  };
 
   return (
       <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4">
@@ -164,6 +235,7 @@ END {
             <p className="text-sm text-gray-400">From "Pinpointing Pain Points in Your Code: Effective Value-Driven Refactoring" - Wix Engineering Conference 2024</p>
           </div>
 
+          {/* Global Parameters Section */}
           <div className="mb-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
             <div className="flex items-center gap-2 mb-4">
               <Info className="w-5 h-5 text-blue-400" />
@@ -174,14 +246,12 @@ END {
                 <label className="block text-sm font-medium text-gray-300 mb-1">Time Window</label>
                 <select
                     value={globalTimeWindow}
-                    onChange={(e) => setGlobalTimeWindow(e.target.value)}
+                    onChange={(e) => setGlobalTimeWindow(e.target.value as TimeWindow)}
                     className="w-full p-2 bg-gray-700 border-gray-600 rounded-md text-gray-100"
                 >
-                  <option value="1 month">Last Month</option>
-                  <option value="3 months">Last 3 Months</option>
-                  <option value="6 months">Last 6 Months</option>
-                  <option value="1 year">Last Year</option>
-                  <option value="2 years">Last 2 Years</option>
+                  {TIME_WINDOWS.map(window => (
+                      <option key={window} value={window}>Last {window}</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -199,6 +269,7 @@ END {
             </div>
           </div>
 
+          {/* Patterns Section */}
           <div className="space-y-8">
             {patterns.map((pattern) => {
               const params = getEffectiveParams(pattern.id);
@@ -217,7 +288,7 @@ END {
                           <input
                               type="checkbox"
                               checked={commandParams[pattern.id].useGlobal}
-                              onChange={(e) => updateCommandParams(pattern.id, { useGlobal: e.target.checked })}
+                              onChange={(e) => updateCommandParams(pattern.id, {useGlobal: e.target.checked})}
                               className="rounded bg-gray-700"
                           />
                           <label className="text-sm text-gray-300">Use global parameters</label>
@@ -229,14 +300,12 @@ END {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Time Window</label>
                                 <select
                                     value={commandParams[pattern.id].timeWindow}
-                                    onChange={(e) => updateCommandParams(pattern.id, { timeWindow: e.target.value })}
+                                    onChange={(e) => updateCommandParams(pattern.id, {timeWindow: e.target.value as TimeWindow})}
                                     className="w-full p-2 bg-gray-700 border-gray-600 rounded-md text-gray-100"
                                 >
-                                  <option value="1 month">Last Month</option>
-                                  <option value="3 months">Last 3 Months</option>
-                                  <option value="6 months">Last 6 Months</option>
-                                  <option value="1 year">Last Year</option>
-                                  <option value="2 years">Last 2 Years</option>
+                                  {TIME_WINDOWS.map(window => (
+                                      <option key={window} value={window}>Last {window}</option>
+                                  ))}
                                 </select>
                               </div>
                               <div>
@@ -244,7 +313,7 @@ END {
                                 <input
                                     type="text"
                                     value={commandParams[pattern.id].keywords}
-                                    onChange={(e) => updateCommandParams(pattern.id, { keywords: e.target.value })}
+                                    onChange={(e) => updateCommandParams(pattern.id, {keywords: e.target.value})}
                                     className="w-full p-2 bg-gray-700 border-gray-600 rounded-md text-gray-100"
                                 />
                               </div>
@@ -254,13 +323,19 @@ END {
                         <div className="space-y-3 pt-2">
                           {pattern.params.map((param) => (
                               <div key={param.name}>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">{param.label}</label>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                  {param.label}
+                                </label>
                                 <input
                                     type={param.type}
                                     min={param.min}
                                     max={param.max}
-                                    value={commandParams[pattern.id][param.name]}
-                                    onChange={(e) => updateCommandParams(pattern.id, { [param.name]: e.target.value })}
+                                    value={getParamValue(commandParams[pattern.id], param.name)}
+                                    onChange={(e) =>
+                                        updateCommandParams(pattern.id, {
+                                          [param.name]: Number(e.target.value)
+                                        })
+                                    }
                                     className="w-full p-2 bg-gray-700 border-gray-600 rounded-md text-gray-100"
                                 />
                               </div>
@@ -273,7 +348,7 @@ END {
                       <code className="text-sm">{pattern.command(params)}</code>
                     </pre>
                         <button
-                            onClick={() => navigator.clipboard.writeText(pattern.command(params))}
+                            onClick={() => handleCopyToClipboard(pattern.command(params))}
                             className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-700 text-gray-100 rounded hover:bg-gray-600 transition-colors"
                         >
                           Copy
@@ -290,12 +365,12 @@ END {
             <div className="flex justify-center space-x-4">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-gray-300">git log</span>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-gray-300">analytics</span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-gray-300">patterns</span>
-            </div>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-gray-300">patterns</span>
           </div>
         </div>
       </div>
-  );
+</div>
+);
 };
 
 export default GitSpotlight;
