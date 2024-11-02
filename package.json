@@ -1,5 +1,6 @@
 {
   "name": "git-spotlight",
+  "homepage": "https://asafkorem.github.io/gitspotlight",
   "version": "0.1.0",
   "private": true,
   "scripts": {
