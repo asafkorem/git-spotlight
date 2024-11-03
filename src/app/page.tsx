@@ -10,8 +10,10 @@ export default function Home() {
         <div className="max-w-5xl mx-auto space-y-6">
           <header className="text-center py-8">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Flashlight className="w-8 h-8 text-yellow-500 transform rotate-[145deg]" />
-              <h1 className="text-3xl font-bold">Git Spotlight</h1>
+              <Flashlight
+                  className="w-8 h-8 text-yellow-500 transform rotate-[145deg] animate-shine"
+              />
+              <h1 className="text-3xl font-bold text-glow">Git Spotlight</h1>
             </div>
             <p className="text-[#8b949e] max-w-2xl mx-auto mb-6">
               Discover insights in your git history with these carefully crafted command patterns.

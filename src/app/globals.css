@@ -33,3 +33,29 @@
     --ring: 212.7 26.8% 83.9%;
   }
 }
+
+@keyframes shine {
+  0% {
+    filter: drop-shadow(0 0 2px #eab308) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px #eab308) brightness(1.2);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #eab308) brightness(1);
+  }
+}
+
+.animate-shine {
+  animation: shine 5s ease-in-out infinite;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px rgb(234 179 8 / 0.3);
+  }
+}
