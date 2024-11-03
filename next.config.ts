@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: 'export',
-    basePath: '/git-spotlight', // Should match your repository name
+    basePath: process.env.NODE_ENV === 'production' ? '/git-spotlight' : '',
     images: {
         unoptimized: true,
     },
