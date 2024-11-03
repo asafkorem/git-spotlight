@@ -41,7 +41,7 @@ export const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
             <div className="p-5 space-y-5">
                 {pattern.params.map(param => (
                     <div key={param.name} className="space-y-2">
-                        <label className="text-[#c9d1d9] text-sm font-medium flex items-baseline justify-between">
+                        <label className="text-[#c9d1d9] text-sm font-medium block">
                             {param.label}
                             {param.description && (
                                 <span className="text-[#8b949e] ml-2 text-xs font-normal">

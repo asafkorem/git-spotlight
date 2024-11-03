@@ -16,18 +16,6 @@ export const CustomNumberInput: React.FC<CustomNumberInputProps> = ({
                                                                         max,
                                                                         className
                                                                     }) => {
-    const increment = () => {
-        if (max === undefined || value < max) {
-            onChange(value + 1);
-        }
-    };
-
-    const decrement = () => {
-        if (min === undefined || value > min) {
-            onChange(value - 1);
-        }
-    };
-
     return (
         <div className="flex items-center gap-2">
             <input
@@ -40,7 +28,7 @@ export const CustomNumberInput: React.FC<CustomNumberInputProps> = ({
                         onChange(newValue);
                     }
                 }}
-                className={`w-20 bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 
+                className={`w-24 bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-1.5 
                 text-left text-[#c9d1d9] text-sm focus:outline-none focus:ring-1 
                 focus:ring-[#388bfd]/40 focus:border-[#388bfd] hover:border-[#3d4449] 
                 transition-colors duration-200 [appearance:textfield] 
@@ -49,12 +37,12 @@ export const CustomNumberInput: React.FC<CustomNumberInputProps> = ({
                 min={min}
                 max={max}
             />
-            <div className="flex border border-[#30363d] rounded-lg overflow-hidden">
+            <div className="inline-flex border border-[#30363d] rounded-lg overflow-hidden">
                 <button
                     type="button"
-                    onClick={decrement}
+                    onClick={() => onChange(Math.max((min ?? -Infinity), value - 1))}
                     disabled={min !== undefined && value <= min}
-                    className="px-2 py-2 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#30363d]
+                    className="px-2 py-1.5 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#30363d]
                     disabled:text-[#484f58] disabled:hover:bg-transparent
                     disabled:cursor-not-allowed transition-colors duration-200 border-r border-[#30363d]"
                 >
@@ -62,9 +50,9 @@ export const CustomNumberInput: React.FC<CustomNumberInputProps> = ({
                 </button>
                 <button
                     type="button"
-                    onClick={increment}
+                    onClick={() => onChange(Math.min((max ?? Infinity), value + 1))}
                     disabled={max !== undefined && value >= max}
-                    className="px-2 py-2 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#30363d]
+                    className="px-2 py-1.5 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#30363d]
                     disabled:text-[#484f58] disabled:hover:bg-transparent
                     disabled:cursor-not-allowed transition-colors duration-200"
                 >

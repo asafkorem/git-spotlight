@@ -21,7 +21,7 @@ export const hotspotPattern: PatternDefinition = {
             label: 'Filter by commit messages',
             type: 'text',
             defaultValue: 'fix,bug,refactor',
-            description: 'Optional: filter by keywords in commit messages'
+            description: 'Optional: filter by keywords in commit messages, separated by commas (leave empty for all)'
         },
         {
             name: 'limit',
@@ -61,7 +61,7 @@ export const dungeonPattern: PatternDefinition = {
             label: 'Filter by commit messages',
             type: 'text',
             defaultValue: 'fix,bug,refactor',
-            description: 'Optional: filter by keywords in commit messages'
+            description: 'Optional: filter by keywords in commit messages, separated by commas (leave empty for all)'
         },
         {
             name: 'minChanges',
