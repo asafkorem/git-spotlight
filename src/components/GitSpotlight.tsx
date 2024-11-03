@@ -345,10 +345,10 @@ const GitSpotlight: React.FC = () => {
 
                       <div className="relative">
                     <pre className="bg-gray-950 text-gray-100 p-4 rounded-lg overflow-x-auto">
-                      <code className="text-sm">{pattern.command(params)}</code>
+                      <code className="text-sm">{pattern.command(params as any)}</code>
                     </pre>
                         <button
-                            onClick={() => handleCopyToClipboard(pattern.command(params))}
+                            onClick={() => handleCopyToClipboard(pattern.command(params as any))}
                             className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-700 text-gray-100 rounded hover:bg-gray-600 transition-colors"
                         >
                           Copy
