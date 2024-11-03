@@ -13,7 +13,8 @@ export interface ParamConfig {
 
 export interface PatternDefinition {
     id: string;
-    icon: LucideIcon;  // Changed from ReactNode to LucideIcon
+    icon: LucideIcon;
+    iconColor: string;
     title: string;
     description: string;
     params: ParamConfig[];

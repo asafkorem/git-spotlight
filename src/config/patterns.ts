@@ -5,7 +5,8 @@ import { createGitCommand } from '@/utils/git-commands';
 export const hotspotPattern: PatternDefinition = {
     id: 'hotspots',
     icon: Flame,
-    title: 'Hotspots 🌶️',
+    iconColor: '#bd2424',
+    title: 'Hotspots️',
     description: 'Track frequently changing files that might need attention',
     params: [
         {
@@ -44,7 +45,8 @@ ${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords
 export const dungeonPattern: PatternDefinition = {
     id: 'dungeons',
     icon: Skull,
-    title: 'Dungeons 💀',
+    iconColor: '#aeaeae',
+    title: 'Dungeons',
     description: 'Find files with high activity but few contributors',
     params: [
         {

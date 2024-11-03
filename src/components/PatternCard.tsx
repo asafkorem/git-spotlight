@@ -31,7 +31,7 @@ export const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
     return (
         <div className="rounded-lg border border-[#30363d] bg-[#161b22] overflow-hidden">
             <div className="p-4 flex items-center gap-3 border-b border-[#30363d]">
-                <pattern.icon className="w-5 h-5" />
+                <pattern.icon className="w-5 h-5" color={pattern.iconColor} />
                 <div>
                     <h2 className="text-[#c9d1d9] font-medium">{pattern.title}</h2>
                     <p className="text-[#8b949e] text-sm">{pattern.description}</p>
