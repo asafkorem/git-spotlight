@@ -24,17 +24,13 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build CSS
-        run: npx tailwindcss -o ./app/globals.css --minify
-
       - name: Build
         run: npm run build
-        env:
-          NODE_ENV: production
-          NEXT_PUBLIC_BASE_PATH: '/git-spotlight'
 
-      - name: Add .nojekyll file
-        run: touch ./out/.nojekyll
+      - name: Prepare for deployment
+        run: |
+          touch out/.nojekyll
+          echo "git-spotlight.com" > out/CNAME
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
