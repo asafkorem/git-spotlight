@@ -30,6 +30,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          NODE_ENV: production
           NEXT_PUBLIC_BASE_PATH: '/git-spotlight'
 
       - name: Add .nojekyll file

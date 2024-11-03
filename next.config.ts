@@ -5,6 +5,7 @@ const nextConfig = {
     images: {
         unoptimized: true,
     },
+    assetPrefix: process.env.NODE_ENV === 'production' ? '/git-spotlight' : '',
 }
 
 module.exports = nextConfig
