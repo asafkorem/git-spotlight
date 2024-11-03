@@ -19,9 +19,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
+
+      - name: Enable NPM Debugging
+        run: echo "export DEBUG=npm:*" >> $GITHUB_ENV
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Clear npm cache
+        run: npm cache clean --force
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci --loglevel verbose
 
       - name: Build
         run: npm run build
