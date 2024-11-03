@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",
-    "deploy": "npm run build && touch out/.nojekyll"
+    "deploy": "npm run build && touch out/.nojekyll",
+    "serve": "npx serve out"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.0",

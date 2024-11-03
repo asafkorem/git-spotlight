@@ -21,23 +21,20 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Enable NPM Debugging
-        run: echo "export DEBUG=npm:*" >> $GITHUB_ENV
-
-      - name: Update npm
-        run: npm install -g npm@latest
-
-      - name: Clear npm cache
-        run: npm cache clean --force
-
       - name: Install Dependencies
-        run: npm ci --loglevel verbose
+        run: npm ci
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: '/git-spotlight'  # Add if your repo name is git-spotlight
+
+      - name: Add .nojekyll file
+        run: touch ./out/.nojekyll
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: out
           branch: gh-pages
+          clean: true  # Automatically remove deleted files from the deploy branch
