@@ -1,36 +1,21 @@
-import { ReactNode } from 'react';
+import { LucideIcon } from 'lucide-react';
 
-// Make parameter types more specific
-export type ParamType = {
-    text: string;
-    number: number;
-    select: string;
-};
-
-// Configuration for any parameter field
 export interface ParamConfig {
     name: string;
     label: string;
-    type: keyof ParamType;
-    defaultValue: ParamType[keyof ParamType];
-    options?: string[]; // For select type
-    min?: number;      // For number type
-    max?: number;      // For number type
-    // Optional description for tooltip/help text
+    type: 'text' | 'number' | 'select';
+    defaultValue: string | number;
+    options?: string[];
+    min?: number;
+    max?: number;
     description?: string;
 }
 
-// Pattern definition with all its metadata and behavior
 export interface PatternDefinition {
     id: string;
-    icon: ReactNode;
+    icon: LucideIcon;  // Changed from ReactNode to LucideIcon
     title: string;
     description: string;
     params: ParamConfig[];
-    generateCommand: (params: Record<string, ParamType[keyof ParamType]>) => string;
+    generateCommand: (params: Record<string, string | number>) => string;
 }
-
-// Runtime parameter values type that ensures values match their parameter type
-export type PatternParams<T extends PatternDefinition> = {
-    [K in T['params'][number]['name']]: ParamType[Extract<T['params'][number], { name: K }>['type']]
-};

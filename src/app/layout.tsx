@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "GitSpotlight",
+  title: "Git Spotlight",
   description: "Illuminating your code's pain points through git history",
 };
 
