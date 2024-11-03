@@ -24,10 +24,13 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Build CSS
+        run: npx tailwindcss -o ./app/globals.css --minify
+
       - name: Build
         run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: '/git-spotlight'  # Add if your repo name is git-spotlight
+          NEXT_PUBLIC_BASE_PATH: '/git-spotlight'
 
       - name: Add .nojekyll file
         run: touch ./out/.nojekyll
@@ -37,4 +40,4 @@ jobs:
         with:
           folder: out
           branch: gh-pages
-          clean: true  # Automatically remove deleted files from the deploy branch
+          clean: true
