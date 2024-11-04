@@ -42,7 +42,7 @@ export default function Home() {
             </p>
 
             <a
-                href="https://github.com/yourusername/git-spotlight"
+                href="https://github.com/asafkorem/git-spotlight"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full
