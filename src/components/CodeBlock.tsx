@@ -10,13 +10,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'bash' })
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = async () => {
-        // @ts-ignore
-        window.gtag('event', 'code copied', {
-            event_category: 'action',
-            event_label: 'label',
-            value: 'copied'
-        });
-
         await navigator.clipboard.writeText(code);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);

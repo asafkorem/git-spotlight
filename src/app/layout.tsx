@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import GoogleAnalytics from '@/components/GoogleAnalytics';
 import "./globals.css";
 
 const geistSans = localFont({
@@ -15,24 +14,23 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const GA_MEASUREMENT_ID = 'G-NFEVN0VVSF';
-
 export const metadata: Metadata = {
   title: "Git Spotlight",
     description: "Spot pain points in your code through git history",
 };
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
-      {children}
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
       </body>
-      </html>
+    </html>
   );
 }
