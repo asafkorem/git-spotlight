@@ -28,12 +28,12 @@ export const createGitCommand = {
             ? ` --grep='${keywords.split(',').map(k => k.trim()).join('\\|')}' -i`
             : '';
         const fileFilter = createGitCommand.createFileFilter(filePattern || '');
-        return `git log --since="${timeWindow} ago"${grepKeywords} --name-only --pretty=format:""${fileFilter}`;
+        return `git log${grepKeywords} --since="${timeWindow} ago" --name-only --pretty="format:"${fileFilter}`;
     },
 
     getAuthors: (file: string, timeWindow: string) =>
-        `git log --since="${timeWindow} ago" --pretty=format:"%an" -- "${file}" | sort -u`,
+        `git log --follow --since="${timeWindow} ago" --pretty="format:%an" -- "${file}" | sort -u`,
 
     getAuthorContributions: (file: string, timeWindow: string) =>
-        `git log --since="${timeWindow} ago" --pretty=format:"%an" -- "${file}" | sort | uniq -c | sort -nr`
+        `git log --follow --since="${timeWindow} ago" --pretty="format:%an" -- "${file}" | sort | uniq -c | sort -nr`
 };
