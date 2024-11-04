@@ -8,6 +8,7 @@ const geistSans = localFont({
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
@@ -18,7 +19,7 @@ const GA_MEASUREMENT_ID = 'G-NFEVN0VVSF';
 
 export const metadata: Metadata = {
   title: "Git Spotlight",
-  description: "Illuminating your code's pain points through git history",
+    description: "Spot pain points in your code through git history",
 };
 
 export default function RootLayout({
