@@ -20,6 +20,10 @@ export default function Home() {
             </p>
           </header>
 
+          <div className="rounded-xl bg-[#1c2128] border border-[#30363d] py-2.5 px-5 text-sm text-[#8b949e] text-center">
+            <b>Usage:</b> Configure the options below and run the generated commands in your git repository's root directory through your terminal.
+          </div>
+
           <div className="grid grid-cols-1 gap-6">
             {patterns.map(pattern => (
                 <PatternCard
