@@ -22,6 +22,13 @@ export const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
             ...prev,
             [param.name]: value
         }));
+
+        // @ts-ignore
+        window.gtag('event', 'param changed', {
+            event_category: 'action',
+            event_label: 'label',
+            value: `${param.name} changed to ${value}`
+        });
     };
 
     const command = pattern.generateCommand(params);
