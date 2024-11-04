@@ -94,7 +94,7 @@ export const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
 
                 <div className="mt-6">
                     <label className="text-[#c9d1d9] text-sm font-medium mb-2 block">Generated Command</label>
-                    <CodeBlock code={command} />
+                    <CodeBlock code={command.trim()} />
                 </div>
             </div>
         </div>
