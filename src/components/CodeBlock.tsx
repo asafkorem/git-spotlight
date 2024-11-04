@@ -6,7 +6,7 @@ interface CodeBlockProps {
     language?: string;
 }
 
-export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'bash' }) => {
+export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'shell' }) => { // Changed default to shell
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = async () => {
@@ -17,11 +17,15 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'bash' })
 
     return (
         <div className="relative group">
-            <pre className="bg-[#0d1117] p-4 rounded-lg overflow-x-auto text-[#c9d1d9] text-sm border border-[#30363d] font-mono selection:bg-[#264f78]">
-                <div className="absolute right-2 top-2">
+            <pre className="bg-[#0d1117] p-4 rounded-lg overflow-x-auto text-[#c9d1d9] text-sm border border-[#30363d]
+                          font-mono selection:bg-[#264f78] max-h-[400px] overflow-y-auto
+                          scrollbar-thin scrollbar-thumb-[#30363d] scrollbar-track-transparent">
+                <div className="absolute right-2 top-2 z-10">
                     <button
                         onClick={handleCopy}
-                        className="p-2 text-[#8b949e] hover:text-[#c9d1d9] rounded-md bg-[#161b22] hover:bg-[#1f242c] border border-[#30363d] transition-all duration-200"
+                        className="p-2 text-[#8b949e] hover:text-[#c9d1d9] rounded-md
+                                 bg-[#161b22] hover:bg-[#1f242c] border border-[#30363d]
+                                 transition-all duration-200 shadow-sm"
                         title="Copy to clipboard"
                     >
                         {isCopied ? (
@@ -31,7 +35,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'bash' })
                         )}
                     </button>
                 </div>
-                <code className="language-{language}">
+                <code className={`language-${language} block`}>
                     {code}
                 </code>
             </pre>

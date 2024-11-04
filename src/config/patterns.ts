@@ -2,6 +2,20 @@ import { Flame, Skull, Link } from 'lucide-react';
 import { PatternDefinition } from '@/types/git-patterns';
 import { createGitCommand } from '@/utils/git-commands';
 
+// Color constants for better readability
+const COLORS = {
+    reset: "\\033[0m",
+    bold: "\\033[1m",
+    dim: "\\033[2m",
+    red: "\\033[31m",
+    green: "\\033[32m",
+    yellow: "\\033[33m",
+    blue: "\\033[34m",
+    magenta: "\\033[35m",
+    cyan: "\\033[36m",
+    white: "\\033[37m",
+} as const;
+
 export const hotspotPattern: PatternDefinition = {
     id: 'hotspots',
     icon: Flame,
@@ -22,7 +36,7 @@ export const hotspotPattern: PatternDefinition = {
             type: 'text',
             defaultValue: '',
             placeholder: 'e.g., js,ts,!test.ts,!spec.js',
-            description: 'Filter by file extensions or patterns. Use ! to exclude. Separate with commas'
+            description: 'Filter by file extensions or paths. Use ! to exclude. Example: js,ts (all JS/TS files), src/*.js (JS in src), !test.ts (exclude test files)'
         },
         {
             name: 'keywords',
@@ -43,14 +57,22 @@ export const hotspotPattern: PatternDefinition = {
         }
     ],
     generateCommand: (params) => `
-echo "Finding most frequently changed files..."
-${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
+echo "${COLORS.cyan}⚡ Finding most frequently changed files...${COLORS.reset}"
+result=$(${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
   grep -v "^$" | \\
   sort | \\
   uniq -c | \\
   sort -rn | \\
   head -${params.limit} | \\
-  awk '{printf "%5d changes: %s\\n", $1, $2}'
+  awk '{printf "    %d changes: %s\\n", $1, $2}')
+
+if [ -z "$result" ]; then
+  echo "${COLORS.yellow}No hotspots found matching your criteria${COLORS.reset}"
+else
+  count=$(echo "$result" | wc -l | tr -d ' ')
+  echo "${COLORS.green}Found $count hotspots:${COLORS.reset}"
+  echo "$result" | awk '{printf "%s%s%s\\n", "\\033[1m", $0, "\\033[0m"}'
+fi
 `
 };
 
@@ -74,7 +96,7 @@ export const dungeonPattern: PatternDefinition = {
             type: 'text',
             defaultValue: '',
             placeholder: 'e.g., js,ts,!test.ts,!spec.js',
-            description: 'Filter by file extensions or patterns. Use ! to exclude. Separate with commas'
+            description: 'Filter by file extensions or paths. Use ! to exclude. Example: js,ts (all JS/TS files), src/*.js (JS in src), !test.ts (exclude test files)'
         },
         {
             name: 'keywords',
@@ -106,11 +128,11 @@ export const dungeonPattern: PatternDefinition = {
         }
     ],
     generateCommand: (params) => `
-echo "Creating temporary workspace..."
+echo "${COLORS.cyan}🏰 Initializing dungeon search...${COLORS.reset}"
 tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'tmpdir')
 trap 'rm -rf "$tmpdir"' EXIT
 
-echo "Getting list of files that match minimum changes..."
+echo "${COLORS.blue}📊 Analyzing change patterns...${COLORS.reset}"
 ${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
   grep -v "^$" | \\
   sort | \\
@@ -118,7 +140,14 @@ ${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords
   sort -rn | \\
   awk '$1 >= ${params.minChanges} {print $2}' > "$tmpdir/files"
 
-echo "Analyzing author patterns..."
+if [ ! -s "$tmpdir/files" ]; then
+  echo "${COLORS.yellow}No files found matching your criteria${COLORS.reset}"
+  exit 0
+fi
+
+echo "${COLORS.blue}👥 Analyzing author patterns...${COLORS.reset}"
+found_dungeons=0
+
 while IFS= read -r file; do
   [ ! -f "$file" ] && continue
   
@@ -129,17 +158,24 @@ while IFS= read -r file; do
     tr -d '[:space:]')
   
   if [ "$author_count" -le ${params.maxAuthors} ]; then
-    echo "\\nFile: $file"
-    echo "Changes in last ${params.timeWindow}:"
+    found_dungeons=$((found_dungeons + 1))
+    echo "\\n${COLORS.magenta}Dungeon found: ${COLORS.bold}$file${COLORS.reset}"
+    echo "${COLORS.cyan}Changes in last ${params.timeWindow}:${COLORS.reset}"
     ${createGitCommand.getAuthorContributions("$file", params.timeWindow as string)} | \\
       awk '{
         count=$1
         author=$2
         for(i=3;i<=NF;i++) author=author " " $i
-        printf "  %s: %d changes\\n", author, count
+        printf "  %s%s: %d changes%s\\n", "\\033[1m", author, count, "\\033[0m"
       }'
   fi
 done < "$tmpdir/files"
+
+if [ "$found_dungeons" -eq 0 ]; then
+  echo "${COLORS.yellow}No dungeons found matching your criteria${COLORS.reset}"
+else
+  echo "\\n${COLORS.green}Found $found_dungeons dungeons in total${COLORS.reset}"
+fi
 `
 };
 
@@ -163,7 +199,7 @@ export const dependencyMagnetPattern: PatternDefinition = {
             type: 'text',
             defaultValue: '',
             placeholder: 'e.g., js,ts,!test.ts,!spec.js',
-            description: 'Filter by file extensions or patterns. Use ! to exclude. Separate with commas'
+            description: 'Filter by file extensions or paths. Use ! to exclude. Example: js,ts (all JS/TS files), src/*.js (JS in src), !test.ts (exclude test files)'
         },
         {
             name: 'keywords',
@@ -195,11 +231,10 @@ export const dependencyMagnetPattern: PatternDefinition = {
         }
     ],
     generateCommand: (params) => `
-echo "Creating temporary workspace..."
+echo "${COLORS.cyan}🧲 Initializing dependency analysis...${COLORS.reset}"
 tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'tmpdir')
 trap 'rm -rf "$tmpdir"' EXIT
 
-echo "Defining helper function..."
 get_related_files() {
   local target_file="$1"
   git log --since="${params.timeWindow} ago" --name-only --pretty=format:"%h" | \\
@@ -210,10 +245,10 @@ get_related_files() {
     uniq -c | \\
     sort -rn | \\
     head -${params.showRelated} | \\
-    awk '{printf "  %d co-changes: %s\\n", $1, $2}'
+    awk '{printf "  %s%d co-changes: %s%s\\n", "\\033[1m", $1, $2, "\\033[0m"}'
 }
 
-echo "Finding files with frequent co-changes..."
+echo "${COLORS.blue}🔍 Finding frequently coupled files...${COLORS.reset}"
 ${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
   grep -v "^$" | \\
   grep -v "^[a-f0-9]\\{7,\\}$" | \\
@@ -222,14 +257,27 @@ ${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords
   sort -rn | \\
   awk '$1 >= ${params.minCoChanges} {print $2}' > "$tmpdir/files"
 
-echo "Analyzing dependencies..."
+if [ ! -s "$tmpdir/files" ]; then
+  echo "${COLORS.yellow}No dependency magnets found matching your criteria${COLORS.reset}"
+  exit 0
+fi
+
+found_magnets=0
+echo "${COLORS.blue}📊 Analyzing dependencies...${COLORS.reset}"
 while IFS= read -r file; do
   [ ! -f "$file" ] && continue
   
-  echo "\\nDependency Magnet: $file"
-  echo "Related files:"
+  found_magnets=$((found_magnets + 1))
+  echo "\\n${COLORS.magenta}Dependency Magnet: ${COLORS.bold}$file${COLORS.reset}"
+  echo "${COLORS.cyan}Related files:${COLORS.reset}"
   get_related_files "$file"
 done < "$tmpdir/files"
+
+if [ "$found_magnets" -eq 0 ]; then
+  echo "${COLORS.yellow}No dependency magnets found matching your criteria${COLORS.reset}"
+else
+  echo "\\n${COLORS.green}Found $found_magnets dependency magnets in total${COLORS.reset}"
+fi
 `
 };
 
