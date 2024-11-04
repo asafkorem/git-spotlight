@@ -17,12 +17,20 @@ export const hotspotPattern: PatternDefinition = {
             defaultValue: '6 months'
         },
         {
+            name: 'filePattern',
+            label: 'File patterns',
+            type: 'text',
+            defaultValue: '',
+            placeholder: 'e.g., js,ts,!test.ts,!spec.js',
+            description: 'Filter by file extensions or patterns. Use ! to exclude. Separate with commas'
+        },
+        {
             name: 'keywords',
             label: 'Filter by commit messages',
             type: 'text',
             defaultValue: '',
             placeholder: 'e.g., fix,bug,hotfix,patch',
-            description: 'Optional: filter by keywords in commit messages, separated by commas (leave empty for all)'
+            description: 'Filter by keywords in commit messages, separated by commas. Leave empty for all commits'
         },
         {
             name: 'limit',
@@ -36,7 +44,7 @@ export const hotspotPattern: PatternDefinition = {
     ],
     generateCommand: (params) => `
 echo "Finding most frequently changed files..."
-${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string)} | \\
+${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
   grep -v "^$" | \\
   sort | \\
   uniq -c | \\
@@ -61,12 +69,20 @@ export const dungeonPattern: PatternDefinition = {
             defaultValue: '1 year'
         },
         {
+            name: 'filePattern',
+            label: 'File patterns',
+            type: 'text',
+            defaultValue: '',
+            placeholder: 'e.g., js,ts,!test.ts,!spec.js',
+            description: 'Filter by file extensions or patterns. Use ! to exclude. Separate with commas'
+        },
+        {
             name: 'keywords',
             label: 'Filter by commit messages',
             type: 'text',
             defaultValue: '',
             placeholder: 'e.g., fix,feature,test,docs',
-            description: 'Optional: filter by keywords in commit messages, separated by commas (leave empty for all)'
+            description: 'Filter by keywords in commit messages, separated by commas. Leave empty for all commits'
         },
         {
             name: 'minChanges',
@@ -95,7 +111,7 @@ tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'tmpdir')
 trap 'rm -rf "$tmpdir"' EXIT
 
 echo "Getting list of files that match minimum changes..."
-${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string)} | \\
+${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
   grep -v "^$" | \\
   sort | \\
   uniq -c | \\
@@ -142,6 +158,22 @@ export const dependencyMagnetPattern: PatternDefinition = {
             defaultValue: '6 months'
         },
         {
+            name: 'filePattern',
+            label: 'File patterns',
+            type: 'text',
+            defaultValue: '',
+            placeholder: 'e.g., js,ts,!test.ts,!spec.js',
+            description: 'Filter by file extensions or patterns. Use ! to exclude. Separate with commas'
+        },
+        {
+            name: 'keywords',
+            label: 'Filter by commit messages',
+            type: 'text',
+            defaultValue: '',
+            placeholder: 'e.g., fix,refactor,feat',
+            description: 'Filter by keywords in commit messages, separated by commas. Leave empty for all commits'
+        },
+        {
             name: 'minCoChanges',
             label: 'Minimum co-changes',
             type: 'number',
@@ -182,7 +214,7 @@ get_related_files() {
 }
 
 echo "Finding files with frequent co-changes..."
-git log --since="${params.timeWindow} ago" --name-only --pretty=format:"%h" | \\
+${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords as string, params.filePattern as string)} | \\
   grep -v "^$" | \\
   grep -v "^[a-f0-9]\\{7,\\}$" | \\
   sort | \\
