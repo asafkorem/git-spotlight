@@ -45,11 +45,11 @@ export default function Home() {
                 href="https://github.com/yourusername/git-spotlight"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg
+                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full
                      bg-[#21262d] hover:bg-[#30363d]
                      border border-[#30363d] hover:border-[#8b949e]
                      transition-all duration-200 ease-in-out group
-                     text-[#c9d1d9] hover:text-white rounded"
+                     text-[#c9d1d9] hover:text-white"
             >
               <img
                   src="/github.svg"
