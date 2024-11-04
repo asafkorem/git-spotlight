@@ -81,6 +81,7 @@ export const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
                         ) : (
                             <input
                                 type="text"
+                                placeholder={param.placeholder}
                                 value={String(params[param.name])}
                                 onChange={(e) => handleParamChange(param, e.target.value)}
                                 className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-3 py-2 text-[#c9d1d9] text-sm

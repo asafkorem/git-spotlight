@@ -5,6 +5,7 @@ export interface ParamConfig {
     label: string;
     type: 'text' | 'number' | 'select';
     defaultValue: string | number;
+    placeholder?: string;
     options?: string[];
     min?: number;
     max?: number;
