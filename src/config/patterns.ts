@@ -225,7 +225,13 @@ get_related_files() {
     uniq -c | \\
     sort -rn | \\
     head -${params.showRelated} | \\
+    tee "$tmpdir/cochanges_\${target_file//\\//_}" | \\
     awk '{printf "  %s%d co-changes: %s%s\\n", "\\033[1m", $1, $2, "\\033[0m"}'
+}
+
+get_total_cochanges() {
+  local file="$1"
+  awk '{sum += $1} END {print sum}' "$tmpdir/cochanges_\${file//\\//_}" 2>/dev/null || echo 0
 }
 
 echo "${COLORS.blue}🔍 Finding frequently coupled files...${COLORS.reset}"
@@ -235,30 +241,43 @@ ${createGitCommand.countFileChanges(params.timeWindow as string, params.keywords
   sort | \\
   uniq -c | \\
   sort -rn | \\
-  awk '$1 >= ${params.minCoChanges} {print $2}' > "$tmpdir/files"
+  awk '$1 >= ${params.minCoChanges} {print $2}' > "$tmpdir/candidates"
 
-if [ ! -s "$tmpdir/files" ]; then
+if [ ! -s "$tmpdir/candidates" ]; then
   echo "${COLORS.yellow}No dependency magnets found matching your criteria${COLORS.reset}"
   exit 0
 fi
 
-found_magnets=0
 echo "${COLORS.blue}📊 Analyzing dependencies...${COLORS.reset}"
+# First pass: collect co-changes data
 while IFS= read -r file; do
   [ ! -f "$file" ] && continue
-  
-  found_magnets=$((found_magnets + 1))
-  if [ "$found_magnets" -le ${params.topResults} ]; then
+  get_related_files "$file" >/dev/null
+done < "$tmpdir/candidates"
+
+echo "${COLORS.blue}🔍 Analyzing results...${COLORS.reset}"
+found_magnets=0
+while IFS= read -r file; do
+  [ ! -f "$file" ] && continue
+  total_cochanges=$(get_total_cochanges "$file")
+  echo "$total_cochanges $file"
+done < "$tmpdir/candidates" | \\
+  sort -rn | \\
+  head -${params.topResults} | \\
+  while IFS= read -r line; do
+    file=$(echo "$line" | cut -d' ' -f2-)
+    total=$(echo "$line" | cut -d' ' -f1)
+    found_magnets=$((found_magnets + 1))
     echo "\\n${COLORS.magenta}Dependency Magnet: ${COLORS.bold}$file${COLORS.reset}"
+    echo "${COLORS.cyan}Total co-changes: ${COLORS.bold}$total${COLORS.reset}"
     echo "${COLORS.cyan}Related files:${COLORS.reset}"
-    get_related_files "$file"
-  fi
-done < "$tmpdir/files"
+    cat "$tmpdir/cochanges_\${file//\\//_}"
+  done
 
 if [ "$found_magnets" -eq 0 ]; then
   echo "${COLORS.yellow}No dependency magnets found matching your criteria${COLORS.reset}"
 else
-  echo "\\n${COLORS.green}Found $found_magnets dependency magnets in total${COLORS.reset}"
+  echo "\\n${COLORS.green}Found $found_magnets dependency magnets with highest coupling${COLORS.reset}"
 fi
 `
 };
